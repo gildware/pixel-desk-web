@@ -7,13 +7,13 @@ export const HERO_CONTENT: {
 } = {
   title1: (
     <>
-      Great <span>Customer</span>
+      Great <span>Project</span>
     </>
   ),
-  title2: "Relationships Start Here.",
+  title2: "Management Starts Here.",
   description: (
     <>
-      PixelDesk provides all customer management service within one software.
+      PixelDesk provides all project management service within one software.
       <br />
       Our landing works on all devices.
     </>

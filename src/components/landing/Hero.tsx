@@ -17,7 +17,7 @@ export default function Hero() {
         <div className="row justify-content-center z-index-3">
           <div className="col-xl-11">
             <div className="tp-hero-title-box text-center">
-              <h2 className="tp-hero-title-3 hero-text-anim pb-5">
+              <h2 className="tp-hero-title-3 hero-text-anim pb-6">
                 <i>
                   <i className="child-1">{HERO_CONTENT.title1}</i>
                 </i>
@@ -36,9 +36,9 @@ export default function Hero() {
             >
               <Link
                 className="tp-btn-blue-lg tp-btn-hover alt-color-black"
-                href="#"
+                href="/login"
               >
-                <span>Live Demo</span>
+                <span>Login</span>
                 <b></b>
               </Link>
               <Link

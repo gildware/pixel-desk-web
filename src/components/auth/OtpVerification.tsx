@@ -4,14 +4,20 @@ import { useState } from "react";
 
 interface OtpVerificationProps {
   email: string;
-  onVerify?: (otp: string) => void;
+  onVerify?: (otp: string) => Promise<void> | void;
+  loading: boolean;
+  error?: string;
 }
 
 export default function OtpVerification({
   email,
   onVerify,
+  loading,
+  error,
 }: OtpVerificationProps) {
   const [otp, setOtp] = useState<string[]>(Array(6).fill(""));
+  const [agreeOffers, setAgreeOffers] = useState(false);
+  const [agreeTerms, setAgreeTerms] = useState(false);
 
   const handleChange = (value: string, index: number) => {
     if (!/^\d?$/.test(value)) return;
@@ -25,57 +31,131 @@ export default function OtpVerification({
     }
   };
 
-  const submitOtp = () => {
-    onVerify?.(otp.join(""));
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    index: number,
+  ) => {
+    if (e.key === "Backspace" && otp[index] === "" && index > 0) {
+      const prevInput = document.getElementById(`otp-${index - 1}`);
+      prevInput?.focus();
+    }
+  };
+
+  const otpValue = otp.join("");
+  const isOtpComplete = otp.every((d) => d.length === 1);
+  const canSubmit = isOtpComplete && agreeOffers && agreeTerms && !loading;
+
+  const submitOtp = async () => {
+    if (!canSubmit) return;
+    await onVerify?.(otpValue);
   };
 
   return (
-    <>
-      <h2 className="mb-2 text-center text-xl font-semibold text-violet-600">
-        We have sent you the code
-      </h2>
-
-      <p className="mb-6 text-center text-sm text-zinc-600">
-        at <span className="font-medium">{email}</span>
-      </p>
-
-      <p className="mb-4 text-center text-sm text-zinc-700">
-        To login the dashboard, enter the code here
-      </p>
-
-      <div className="mb-6 flex justify-center gap-3">
-        {otp.map((digit, index) => (
-          <input
-            key={index}
-            id={`otp-${index}`}
-            value={digit}
-            maxLength={1}
-            onChange={(e) => handleChange(e.target.value, index)}
-            className="h-12 w-12 rounded-md border border-zinc-300 text-center text-lg focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
-          />
-        ))}
+    <div className="signin-banner-from-wrap">
+      <div className="signin-banner-title-box">
+        <h5 className="signin-banner-from-title">
+          We have sent you the code at
+        </h5>
       </div>
 
-      <button
-        onClick={submitOtp}
-        className="mb-4 w-full rounded-md bg-violet-600 py-2 text-sm font-semibold text-white hover:bg-violet-700"
-      >
-        Verify
-      </button>
+      <div className="signin-banner-from-box text-center">
+        <small>{email || "test@mail.com"}</small>
 
-      <div className="mb-4 space-y-2 text-xs text-zinc-600">
-        <label className="flex items-center gap-2">
-          <input type="checkbox" />I agree to receive offers and product
-          updates.
-        </label>
-        <label className="flex items-center gap-2">
-          <input type="checkbox" />I agree to Terms of Service & Privacy Policy.
-        </label>
+        <form>
+          <div className="row">
+            <small>To login the dashboard, Enter the code here</small>
+            <div className="col-12 mt-2">
+              <div className="mb-6 flex justify-center gap-3">
+                {otp.map((digit, index) => (
+                  <input
+                    key={index}
+                    id={`otp-${index}`}
+                    value={digit}
+                    maxLength={1}
+                    onChange={(e) => handleChange(e.target.value, index)}
+                    onKeyDown={(e) => handleKeyDown(e, index)}
+                    className="h-12 w-12 rounded-md text-center text-lg"
+                    style={
+                      error
+                        ? { border: "1px solid red" }
+                        : { border: "1px solid #d1d5db" }
+                    }
+                  />
+                ))}
+              </div>
+
+              {/* ✅ ERROR MESSAGE */}
+              {error && (
+                <small style={{ color: "red", display: "block", marginTop: 6 }}>
+                  {error}
+                </small>
+              )}
+            </div>
+          </div>
+        </form>
+
+        <div className="signin-banner-form-remember pt-10">
+          <div className="row">
+            <div className="col-12">
+              <div className="postbox__comment-agree text-left">
+                <div className="form-check">
+                  <input
+                    className="form-check-input"
+                    type="checkbox"
+                    checked={agreeOffers}
+                    onChange={(e) => setAgreeOffers(e.target.checked)}
+                  />
+                  <small>
+                    I agree to receive offers, tips and product updates sent by
+                    Pixelflow. Unsubscribe anytime.
+                  </small>
+                </div>
+              </div>
+            </div>
+            <div className="col-12">
+              <div className="postbox__comment-agree text-left">
+                <div className="form-check">
+                  <input
+                    className="form-check-input"
+                    type="checkbox"
+                    checked={agreeTerms}
+                    onChange={(e) => setAgreeTerms(e.target.checked)}
+                  />
+                  <small>
+                    I agree to PixelFlow’s Terms of Service & Privacy Policy.
+                  </small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="signin-banner-from-btn mt-20">
+          <button
+            type="button"
+            className="signin-btn w-full"
+            onClick={submitOtp}
+            disabled={!canSubmit}
+            style={
+              !canSubmit
+                ? { cursor: "not-allowed", opacity: 0.6 }
+                : { cursor: "pointer" }
+            }
+          >
+            {loading ? (
+              <span className="d-inline-flex align-items-center gap-2">
+                <span
+                  className="spinner-border spinner-border-sm"
+                  role="status"
+                />
+                Verifying...
+              </span>
+            ) : (
+              "Verify OTP"
+            )}
+          </button>
+        </div>
       </div>
-
-      <p className="text-center text-xs text-zinc-500">
-        Resend Code <span className="font-medium text-violet-600">00:58s</span>
-      </p>
-    </>
+    </div>
   );
 }
