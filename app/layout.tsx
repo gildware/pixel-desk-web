@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
+import { SessionProvider } from "@/src/context/SessionContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,7 +46,8 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <SessionProvider>{children}</SessionProvider>
+        {/* {children} */}
 
         {/* JS (same as your HTML, same order) */}
         <Script src="/assets/js/jquery.js" strategy="beforeInteractive" />

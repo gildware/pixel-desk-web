@@ -3,11 +3,14 @@ import Link from "next/link";
 import { useState } from "react";
 import LoginForm from "@/src/components/auth/LoginForm";
 import OtpVerification from "@/src/components/auth/OtpVerification";
-import { requestOtp, verifyOtp } from "@/src/services/api/auth.api";
+import { logout, requestOtp, verifyOtp } from "@/src/services/api/auth.api";
+import { useSession } from "@/src/context/SessionContext";
 export default function AuthBase() {
+  const { session, loading: sessionLoading } = useSession();
   const [email, setEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState();
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const handleRequestOtp = async (value: string) => {
     try {
@@ -30,11 +33,25 @@ export default function AuthBase() {
 
       // ✅ cookies are now set by backend
       // redirect user to billing / company selection
-      window.location.href = "/profile";
+      window.location.href = "/";
     } catch (err: any) {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      setLoggingOut(true);
+      await logout();
+
+      // ✅ cookies cleared by backend
+      window.location.href = "/login";
+    } catch (err: any) {
+      alert(err.message || "Logout failed");
+    } finally {
+      setLoggingOut(false);
     }
   };
   return (
@@ -81,23 +98,47 @@ export default function AuthBase() {
           </div>
         </div>
       </div>
+      {!sessionLoading && (
+        <div className="signin-banner-from d-flex justify-content-center align-items-center">
+          {session ? (
+            <div className="flex flex-col gap-5justify-center text-center">
+              <Link
+                className="tp-btn-blue-sm d-none d-md-inline-block tp-btn-hover alt-color-black"
+                href={process.env.NEXT_DASHBOARD_URL || "http://localhost:5173"}
+                target="_blank"
+              >
+                <span>Go To Dashboard</span>
+                <b></b>
+              </Link>
 
-      <div className="signin-banner-from d-flex justify-content-center align-items-center">
-        {!email ? (
-          <LoginForm
-            onContinue={handleRequestOtp}
-            loading={loading}
-            error={error}
-          />
-        ) : (
-          <OtpVerification
-            email={email}
-            onVerify={handleVerifyOtp}
-            loading={loading}
-            error={error}
-          />
-        )}
-      </div>
+              <button
+                onClick={handleLogout}
+                disabled={loggingOut}
+                className="tp-btn-red mt-5 h-10"
+              >
+                {loggingOut ? "Logging out…" : "Logout"}
+              </button>
+            </div>
+          ) : (
+            <>
+              {!email ? (
+                <LoginForm
+                  onContinue={handleRequestOtp}
+                  loading={loading}
+                  error={error}
+                />
+              ) : (
+                <OtpVerification
+                  email={email}
+                  onVerify={handleVerifyOtp}
+                  loading={loading}
+                  error={error}
+                />
+              )}
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }

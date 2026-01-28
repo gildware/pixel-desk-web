@@ -18,4 +18,10 @@ export const logout = () => {
   return apiClient('/auth/logout', {
     method: 'POST',
   });
+}; 
+
+export const getSession = () => {
+  return apiClient("/auth/session", {
+    method: "GET",
+  });
 };

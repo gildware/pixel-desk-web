@@ -1,7 +1,10 @@
+"use client";
+import { useSession } from "@/src/context/SessionContext";
 import { MENU_ITEMS } from "@/src/data/home/menu_data";
 import Link from "next/link";
 
 export default function Header() {
+  const { session, loading } = useSession();
   return (
     <header className="tp-header-height">
       <div
@@ -44,31 +47,37 @@ export default function Header() {
 
             <div className="col-xxl-4 col-xl-4 col-lg-4 col-md-8 col-6">
               <div className="header-bottom__right d-flex align-items-center justify-content-end">
-                <div className="header-bottom__action">
-                  <Link
-                    className="d-none d-lg-inline-block header-bottom__action-2 border-none"
-                    href="/login"
-                  >
-                    <span>Log In</span>
-                  </Link>
-                </div>
+                {!session ? (
+                  <div className="header-bottom__action">
+                    <Link
+                      className="d-none d-lg-inline-block header-bottom__action-2 border-none"
+                      href="/login"
+                    >
+                      <span>Log In</span>
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="header-bottom__btn d-flex align-items-center">
+                    <Link
+                      className="tp-btn-blue-sm d-none d-md-inline-block tp-btn-hover alt-color-black"
+                      href={
+                        process.env.NEXT_DASHBOARD_URL ||
+                        "http://localhost:5173"
+                      }
+                      target="_blank"
+                    >
+                      <span>Go To Dashboard</span>
+                      <b></b>
+                    </Link>
 
-                <div className="header-bottom__btn d-flex align-items-center">
-                  <Link
-                    className="tp-btn-blue-sm d-none d-md-inline-block tp-btn-hover alt-color-black"
-                    href="/"
-                  >
-                    <span>Get Free</span>
-                    <b></b>
-                  </Link>
-
-                  <Link
-                    className="header-bottom__bar tp-menu-bar d-lg-none"
-                    href="#"
-                  >
-                    <i className="fal fa-bars"></i>
-                  </Link>
-                </div>
+                    <Link
+                      className="header-bottom__bar tp-menu-bar d-lg-none"
+                      href="#"
+                    >
+                      <i className="fal fa-bars"></i>
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
           </div>

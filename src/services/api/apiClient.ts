@@ -20,8 +20,7 @@ export async function apiClient<T>(
       ...options.headers,
     },
     body: options.body ? JSON.stringify(options.body) : undefined,
-  });
-
+  }); 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
     throw new Error(error.message || 'Something went wrong');
