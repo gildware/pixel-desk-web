@@ -104,7 +104,10 @@ export default function AuthBase() {
             <div className="flex flex-col gap-5justify-center text-center">
               <Link
                 className="tp-btn-blue-sm d-none d-md-inline-block tp-btn-hover alt-color-black"
-                href={process.env.NEXT_DASHBOARD_URL || "http://localhost:5173"}
+                href={
+                  process.env.NEXT_PUBLIC_DASHBOARD_URL ||
+                  "http://localhost:NEXT_PUBLIC_DASHBOARD_URL"
+                }
                 target="_blank"
               >
                 <span>Go To Dashboard</span>
