@@ -97,7 +97,7 @@ export default function ProfilePage() {
 
           <button
             onClick={() => {
-              window.open("http://localhost:5173", "_blank");
+              window.open(process.env.NEXT_DASHBOARD_URL, "_blank");
             }}
             className="rounded-md bg-violet-600 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-700"
           >
