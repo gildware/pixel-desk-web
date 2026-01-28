@@ -1,4 +1,4 @@
-name: Build & Deploy React SPA
+name: Build & Deploy Next APp
 
 on:
   push:
