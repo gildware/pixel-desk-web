@@ -2,31 +2,24 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Install dependencies
 COPY package*.json ./
 RUN npm install
 
-# Copy source code
 COPY . .
-
-# Build Vite app
 RUN npm run build
 
-# Debug: check if dist exists
-RUN ls -l /app/dist
-
 # ---- Production Stage ----
-FROM nginx:alpine
-COPY --from=builder /app/dist /usr/share/nginx/html
+FROM node:20-alpine AS runner
+WORKDIR /app
 
-# SPA routing: serve index.html for all routes
-RUN echo 'server { \
-    listen 80; \
-    server_name localhost; \
-    root /usr/share/nginx/html; \
-    index index.html; \
-    location / { try_files $uri /index.html; } \
-}' > /etc/nginx/conf.d/default.conf
+ENV NODE_ENV=production
 
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+COPY --from=builder /app/package*.json ./
+RUN npm install --omit=dev
+
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/next.config.js ./next.config.js
+
+EXPOSE 3000
+CMD ["npm", "start"]
