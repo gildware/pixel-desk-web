@@ -3,7 +3,7 @@ name: Build & Deploy Next APp
 on:
   push:
     branches:
-      - main
+      - development
 
 jobs:
   build-and-push:
