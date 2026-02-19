@@ -16,7 +16,7 @@ export default function Header() {
             <div className="col-xxl-2 col-xl-2 col-lg-2 col-md-4 col-6">
               <div className="header-bottom__logo">
                 <Link href="/">
-                  <h2 className="text-purple-600">PD Prod 1</h2>
+                  <h2 className="text-purple-600">PD Prod 2</h2>
                 </Link>
               </div>
             </div>
