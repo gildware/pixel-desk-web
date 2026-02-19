@@ -38,3 +38,11 @@ jobs:
       - name: Push Docker image
         run: |
           docker push 672627895299.dkr.ecr.eu-north-1.amazonaws.com/nextjs-landing:latest
+      # Force ECS Service Deployment (NextJS)
+      - name: Force ECS Service Deployment
+        run: |
+          aws ecs update-service \
+          --cluster pixeldesk-cluster \
+          --service nextjs-landing-task-service-v53g42xq \
+          --force-new-deployment \
+          --region eu-north-1
