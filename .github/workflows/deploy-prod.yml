@@ -27,7 +27,11 @@ jobs:
       # Build Docker image
       - name: Build Docker image
         run: |
-          docker build -t nextjs-landing:latest .
+          docker build \
+            --build-arg NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }} \
+            --build-arg NEXT_PUBLIC_DASHBOARD_URL=${{ secrets.NEXT_PUBLIC_DASHBOARD_URL }} \
+            --build-arg NEXT_PUBLIC_BASE_URL=${{ secrets.NEXT_PUBLIC_BASE_URL }} \
+            -t nextjs-landing:latest .
 
       # Tag image for ECR
       - name: Tag Docker image
