@@ -1,10 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+const RESEND_COOLDOWN_SECONDS = 60;
 
 interface OtpVerificationProps {
   email: string;
   onVerify?: (otp: string) => Promise<void> | void;
+  onResendOtp?: () => Promise<void> | void;
   loading: boolean;
   error?: string;
 }
@@ -12,12 +15,34 @@ interface OtpVerificationProps {
 export default function OtpVerification({
   email,
   onVerify,
+  onResendOtp,
   loading,
   error,
 }: OtpVerificationProps) {
   const [otp, setOtp] = useState<string[]>(Array(6).fill(""));
   const [agreeOffers, setAgreeOffers] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(RESEND_COOLDOWN_SECONDS);
+  const [resendLoading, setResendLoading] = useState(false);
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setInterval(() => {
+      setResendCooldown((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
+
+  const handleResendOtp = async () => {
+    if (resendCooldown > 0 || resendLoading || !onResendOtp) return;
+    try {
+      setResendLoading(true);
+      await onResendOtp();
+      setResendCooldown(RESEND_COOLDOWN_SECONDS);
+    } finally {
+      setResendLoading(false);
+    }
+  };
 
   const handleChange = (value: string, index: number) => {
     if (!/^\d?$/.test(value)) return;
@@ -154,6 +179,39 @@ export default function OtpVerification({
               "Verify OTP"
             )}
           </button>
+
+          {onResendOtp && (
+            <div className="mt-4 text-center">
+              <small className="d-block text-muted mb-2">
+                Didn&apos;t receive the code?
+              </small>
+              <button
+                type="button"
+                className="btn btn-link p-0 text-decoration-none"
+                onClick={handleResendOtp}
+                disabled={resendCooldown > 0 || resendLoading}
+                style={
+                  resendCooldown > 0 || resendLoading
+                    ? { cursor: "not-allowed", opacity: 0.6 }
+                    : { cursor: "pointer" }
+                }
+              >
+                {resendLoading ? (
+                  <span className="d-inline-flex align-items-center gap-2">
+                    <span
+                      className="spinner-border spinner-border-sm"
+                      role="status"
+                    />
+                    Sending...
+                  </span>
+                ) : resendCooldown > 0 ? (
+                  `Resend OTP (${resendCooldown}s)`
+                ) : (
+                  "Resend OTP"
+                )}
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

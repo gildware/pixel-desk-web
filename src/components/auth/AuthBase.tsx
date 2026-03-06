@@ -24,6 +24,15 @@ export default function AuthBase() {
     }
   };
 
+  const handleResendOtp = async () => {
+    if (!email) return;
+    try {
+      await requestOtp(email);
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
+
   const handleVerifyOtp = async (otp: string) => {
     if (!email) return;
 
@@ -134,6 +143,7 @@ export default function AuthBase() {
                 <OtpVerification
                   email={email}
                   onVerify={handleVerifyOtp}
+                  onResendOtp={handleResendOtp}
                   loading={loading}
                   error={error}
                 />
