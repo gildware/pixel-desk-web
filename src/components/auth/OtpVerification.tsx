@@ -44,6 +44,30 @@ export default function OtpVerification({
     }
   };
 
+  const handlePaste = (
+    e: React.ClipboardEvent<HTMLInputElement>,
+    index: number,
+  ) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData("text");
+    if (!pasted) return;
+
+    const digits = pasted.replace(/\D/g, "").slice(0, otp.length);
+    if (!digits) return;
+
+    const nextOtp = [...otp];
+    for (let i = 0; i < digits.length && index + i < nextOtp.length; i++) {
+      nextOtp[index + i] = digits[i];
+    }
+    setOtp(nextOtp);
+
+    const filledUntil = Math.min(index + digits.length - 1, nextOtp.length - 1);
+    const nextIndex =
+      filledUntil < nextOtp.length - 1 ? filledUntil + 1 : filledUntil;
+    const nextInput = document.getElementById(`otp-${nextIndex}`);
+    nextInput?.focus();
+  };
+
   const handleChange = (value: string, index: number) => {
     if (!/^\d?$/.test(value)) return;
 
@@ -99,6 +123,7 @@ export default function OtpVerification({
                     maxLength={1}
                     onChange={(e) => handleChange(e.target.value, index)}
                     onKeyDown={(e) => handleKeyDown(e, index)}
+                    onPaste={(e) => handlePaste(e, index)}
                     className="h-12 w-12 rounded-md text-center text-lg"
                     style={
                       error

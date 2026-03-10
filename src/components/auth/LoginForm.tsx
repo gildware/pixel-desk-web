@@ -18,7 +18,8 @@ export default function LoginForm({
 
   const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e?: React.FormEvent) => {
+    e?.preventDefault();
     if (!isValidEmail) return;
     onContinue(email);
   };
@@ -64,7 +65,7 @@ export default function LoginForm({
         <div className="signin-banner-from-box text-center">
           <h5 className="signin-banner-from-subtitle">Or Sign In with email</h5>
 
-          <form>
+          <form onSubmit={handleSubmit}>
             <div className="row">
               <div className="col-12">
                 <div className="postbox__comment-input mb-30">
@@ -102,7 +103,7 @@ export default function LoginForm({
 
           <div className="signin-banner-from-btn mb-20">
             <button
-              type="button"
+              type="submit"
               className="signin-btn w-full"
               disabled={!isValidEmail || loading}
               onClick={handleSubmit}
