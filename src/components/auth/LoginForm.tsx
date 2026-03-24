@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 interface LoginFormProps {
-  onContinue: (email: string) => Promise<void> | void;
+  onContinue: (email: string, rememberMe: boolean) => Promise<void> | void;
   loading: boolean;
   error?: string;
 }
@@ -14,6 +14,7 @@ export default function LoginForm({
   error,
 }: LoginFormProps) {
   const [email, setEmail] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [touched, setTouched] = useState(false);
 
   const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -21,7 +22,7 @@ export default function LoginForm({
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
     if (!isValidEmail) return;
-    onContinue(email);
+    onContinue(email, rememberMe);
   };
 
   return (
@@ -96,6 +97,19 @@ export default function LoginForm({
                       {error}
                     </small>
                   )}
+                </div>
+              </div>
+            </div>
+            <div className="col-12 mb-20">
+              <div className="postbox__comment-agree text-left">
+                <div className="form-check">
+                  <input
+                    className="form-check-input"
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                  />
+                  <small>Remember login on this device</small>
                 </div>
               </div>
             </div>

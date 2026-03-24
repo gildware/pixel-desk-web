@@ -7,10 +7,10 @@ export const requestOtp = (email: string) => {
   });
 };
 
-export const verifyOtp = (email: string, otp: string) => {
+export const verifyOtp = (email: string, otp: string, rememberMe: boolean) => {
   return apiClient('/auth/verify-otp', {
     method: 'POST',
-    body: { email, otp },
+    body: { email, otp, rememberMe },
   });
 };
 

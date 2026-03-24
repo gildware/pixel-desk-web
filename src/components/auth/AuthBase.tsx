@@ -1,22 +1,31 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import LoginForm from "@/src/components/auth/LoginForm";
 import OtpVerification from "@/src/components/auth/OtpVerification";
 import { logout, requestOtp, verifyOtp } from "@/src/services/api/auth.api";
 import { useSession } from "@/src/context/SessionContext";
 export default function AuthBase() {
   const { session, loading: sessionLoading } = useSession();
+  const dashboardUrl = process.env.NEXT_PUBLIC_DASHBOARD_URL || "/dashboard";
   const [email, setEmail] = useState<string | null>(null);
+  const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState();
   const [loggingOut, setLoggingOut] = useState(false);
 
-  const handleRequestOtp = async (value: string) => {
+  useEffect(() => {
+    if (!sessionLoading && session) {
+      window.location.replace(dashboardUrl);
+    }
+  }, [dashboardUrl, session, sessionLoading]);
+
+  const handleRequestOtp = async (value: string, rememberChoice: boolean) => {
     try {
       setLoading(true);
       await requestOtp(value);
       setEmail(value);
+      setRememberMe(rememberChoice);
     } catch (err: any) {
       alert(err.message);
     } finally {
@@ -38,11 +47,10 @@ export default function AuthBase() {
 
     try {
       setLoading(true);
-      await verifyOtp(email, otp);
+      await verifyOtp(email, otp, rememberMe);
 
-      // ✅ cookies are now set by backend
-      // redirect user to billing / company selection
-      window.location.href = "/";
+      // cookies are set by backend; reload into protected route
+      window.location.replace(dashboardUrl);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -111,18 +119,7 @@ export default function AuthBase() {
         <div className="signin-banner-from d-flex justify-content-center align-items-center">
           {session ? (
             <div className="flex flex-col gap-5justify-center text-center">
-              <Link
-                className="tp-btn-blue-sm d-none d-md-inline-block tp-btn-hover alt-color-black"
-                href={
-                  process.env.NEXT_PUBLIC_DASHBOARD_URL ||
-                  "http://localhost:NEXT_PUBLIC_DASHBOARD_URL"
-                }
-                target="_blank"
-              >
-                <span>Go To Dashboard</span>
-                <b></b>
-              </Link>
-
+              <small>Redirecting to dashboard...</small>
               <button
                 onClick={handleLogout}
                 disabled={loggingOut}
