@@ -15,7 +15,7 @@ export const HERO_CONTENT: {
     <>
       PixelDesk provides all project management service within one software.
       <br />
-      Our landing works on all devices.
+      Our Project works on all companies.
     </>
   ),
 };
