@@ -1,10 +1,12 @@
 "use client";
 import { useSession } from "@/src/context/SessionContext";
+import { useBranding } from "@/src/context/BrandingContext";
 import { MENU_ITEMS } from "@/src/data/home/menu_data";
 import Link from "next/link";
 
 export default function Header() {
-  const { session, loading } = useSession();
+  const { session } = useSession();
+  const { branding } = useBranding();
   return (
     <header className="tp-header-height">
       <div
@@ -16,7 +18,16 @@ export default function Header() {
             <div className="col-xxl-2 col-xl-2 col-lg-2 col-md-4 col-6">
               <div className="header-bottom__logo">
                 <Link href="/">
-                  <h2 className="text-purple-600">PixelDesk</h2>
+                  {branding.logoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={branding.logoUrl}
+                      alt={branding.siteName}
+                      style={{ maxHeight: 48, width: "auto" }}
+                    />
+                  ) : (
+                    <h2 className="text-purple-600">{branding.siteName}</h2>
+                  )}
                 </Link>
               </div>
             </div>
