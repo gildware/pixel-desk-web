@@ -118,12 +118,12 @@ export default function AuthBase() {
       {!sessionLoading && (
         <div className="signin-banner-from d-flex justify-content-center align-items-center">
           {session ? (
-            <div className="flex flex-col gap-5justify-center text-center">
+            <div className="text-center">
               <small>Redirecting to dashboard...</small>
               <button
                 onClick={handleLogout}
                 disabled={loggingOut}
-                className="tp-btn-red mt-5 h-10"
+                className="tp-btn-red mt-4"
               >
                 {loggingOut ? "Logging out…" : "Logout"}
               </button>

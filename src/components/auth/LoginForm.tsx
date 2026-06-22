@@ -71,7 +71,7 @@ export default function LoginForm({
               <div className="col-12">
                 <div className="postbox__comment-input mb-30">
                   <input
-                    type="text"
+                    type="email"
                     className="inputText"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -91,7 +91,6 @@ export default function LoginForm({
                     </small>
                   )}
 
-                  {/* ✅ API ERROR */}
                   {error && (
                     <small style={{ color: "red", display: "block" }}>
                       {error}
@@ -99,28 +98,29 @@ export default function LoginForm({
                   )}
                 </div>
               </div>
-            </div>
-            <div className="col-12 mb-20">
-              <div className="postbox__comment-agree text-left">
-                <div className="form-check">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                  />
-                  <small>Remember login on this device</small>
+              <div className="col-12 mb-20">
+                <div className="postbox__comment-agree text-left signin-banner-form-remember">
+                  <div className="form-check d-flex align-items-start gap-2">
+                    <input
+                      className="form-check-input mt-1"
+                      type="checkbox"
+                      id="remember-login"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                    />
+                    <label className="form-check-label" htmlFor="remember-login">
+                      <small>Remember login on this device</small>
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>
-          </form>
 
-          <div className="signin-banner-from-btn mb-20">
-            <button
-              type="submit"
-              className="signin-btn w-full"
-              disabled={!isValidEmail || loading}
-              onClick={handleSubmit}
+            <div className="signin-banner-from-btn mb-20">
+              <button
+                type="submit"
+                className="signin-btn w-full"
+                disabled={!isValidEmail || loading}
               style={
                 !isValidEmail || loading
                   ? {
@@ -141,8 +141,9 @@ export default function LoginForm({
               ) : (
                 "Send OTP"
               )}
-            </button>
-          </div>
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </>

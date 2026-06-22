@@ -16097,6 +16097,34 @@ input[type=color] {
   color: var(--tp-common-blue-4);
 }
 
+.signin-otp-inputs {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: nowrap;
+  margin-bottom: 24px;
+}
+.signin-otp-input {
+  width: 48px;
+  height: 48px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 600;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 0;
+  flex: 0 0 48px;
+}
+.signin-otp-input:focus {
+  outline: none;
+  border-color: var(--tp-common-blue-4);
+  box-shadow: 0 0 0 2px rgba(95, 58, 226, 0.15);
+}
+.signin-otp-input.signin-otp-input--error {
+  border-color: #dc3545;
+}
+
 .tp-contact-select .nice-select {
   background: rgba(255, 255, 255, 0.08);
   border: 2px solid rgba(255, 255, 255, 0.14);

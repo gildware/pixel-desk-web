@@ -114,22 +114,19 @@ export default function OtpVerification({
           <div className="row">
             <small>To login the dashboard, Enter the code here</small>
             <div className="col-12 mt-2">
-              <div className="mb-6 flex justify-center gap-3">
+              <div className="signin-otp-inputs">
                 {otp.map((digit, index) => (
                   <input
                     key={index}
                     id={`otp-${index}`}
                     value={digit}
                     maxLength={1}
+                    inputMode="numeric"
+                    autoComplete={index === 0 ? "one-time-code" : "off"}
                     onChange={(e) => handleChange(e.target.value, index)}
                     onKeyDown={(e) => handleKeyDown(e, index)}
                     onPaste={(e) => handlePaste(e, index)}
-                    className="h-12 w-12 rounded-md text-center text-lg"
-                    style={
-                      error
-                        ? { border: "1px solid red" }
-                        : { border: "1px solid #d1d5db" }
-                    }
+                    className={`signin-otp-input${error ? " signin-otp-input--error" : ""}`}
                   />
                 ))}
               </div>
