@@ -1,4 +1,5 @@
 import { API_BASE_URL, DEFAULT_FETCH_OPTIONS } from '@/src/config/api.config';
+import { csrfHeadersForMethod } from '@/src/utils/csrf';
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
@@ -23,6 +24,10 @@ async function postRefresh(): Promise<boolean> {
   const res = await fetch(`${API_BASE_URL}/auth/refresh`, {
     method: 'POST',
     ...DEFAULT_FETCH_OPTIONS,
+    headers: {
+      ...DEFAULT_FETCH_OPTIONS.headers,
+      ...csrfHeadersForMethod('POST'),
+    },
   });
   return res.ok;
 }
@@ -32,11 +37,13 @@ export async function apiClient<T>(
   options: ApiRequestOptions = {},
   didRefresh = false,
 ): Promise<T> {
+  const method = options.method || 'GET';
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...DEFAULT_FETCH_OPTIONS,
-    method: options.method || 'GET',
+    method,
     headers: {
       ...DEFAULT_FETCH_OPTIONS.headers,
+      ...csrfHeadersForMethod(method),
       ...options.headers,
     },
     body: options.body ? JSON.stringify(options.body) : undefined,

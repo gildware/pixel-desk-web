@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { API_BASE_URL } from "../config/api.config";
+import { getSafeImageSrc } from "../utils/safeUrl";
 
 export type Branding = {
   siteName: string;
@@ -26,14 +27,15 @@ const BrandingContext = createContext<{
 });
 
 function applyFavicon(faviconUrl: string | null) {
-  if (typeof document === "undefined" || !faviconUrl) return;
+  const safeFavicon = getSafeImageSrc(faviconUrl);
+  if (typeof document === "undefined" || !safeFavicon) return;
   const head = document.head;
   head
     .querySelectorAll("link[rel~='icon']")
     .forEach((el) => el.parentNode?.removeChild(el));
   const link = document.createElement("link");
   link.rel = "icon";
-  link.href = faviconUrl;
+  link.href = safeFavicon;
   head.appendChild(link);
 }
 
@@ -50,9 +52,9 @@ export function BrandingProvider({ children }: { children: React.ReactNode }) {
         const data = (body?.data ?? body) as Partial<Branding>;
         setBranding({
           siteName: data.siteName || DEFAULT_BRANDING.siteName,
-          logoUrl: data.logoUrl ?? null,
-          logoDarkUrl: data.logoDarkUrl ?? null,
-          faviconUrl: data.faviconUrl ?? null,
+          logoUrl: getSafeImageSrc(data.logoUrl ?? null),
+          logoDarkUrl: getSafeImageSrc(data.logoDarkUrl ?? null),
+          faviconUrl: getSafeImageSrc(data.faviconUrl ?? null),
         });
       })
       .catch(() => {
