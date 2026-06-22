@@ -5,6 +5,18 @@ import LoginForm from "@/src/components/auth/LoginForm";
 import OtpVerification from "@/src/components/auth/OtpVerification";
 import { logout, requestOtp, verifyOtp } from "@/src/services/api/auth.api";
 import { useSession } from "@/src/context/SessionContext";
+
+function dashboardRedirectUrl(baseUrl: string): string {
+  try {
+    const url = new URL(baseUrl, window.location.origin);
+    url.searchParams.set("_cb", Date.now().toString());
+    return url.toString();
+  } catch {
+    const separator = baseUrl.includes("?") ? "&" : "?";
+    return `${baseUrl}${separator}_cb=${Date.now()}`;
+  }
+}
+
 export default function AuthBase() {
   const { session, loading: sessionLoading } = useSession();
   const dashboardUrl = process.env.NEXT_PUBLIC_DASHBOARD_URL || "/dashboard";
@@ -16,7 +28,7 @@ export default function AuthBase() {
 
   useEffect(() => {
     if (!sessionLoading && session) {
-      window.location.replace(dashboardUrl);
+      window.location.replace(dashboardRedirectUrl(dashboardUrl));
     }
   }, [dashboardUrl, session, sessionLoading]);
 
@@ -50,7 +62,7 @@ export default function AuthBase() {
       await verifyOtp(email, otp, rememberMe);
 
       // cookies are set by backend; reload into protected route
-      window.location.replace(dashboardUrl);
+      window.location.replace(dashboardRedirectUrl(dashboardUrl));
     } catch (err: any) {
       setError(err.message);
     } finally {
