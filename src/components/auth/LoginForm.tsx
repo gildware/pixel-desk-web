@@ -3,27 +3,29 @@
 import { useState } from "react";
 
 interface LoginFormProps {
-  onContinue: (email: string, rememberMe: boolean) => Promise<void> | void;
+  onPassword: (email: string, rememberMe: boolean) => void;
+  onOtp: (email: string, rememberMe: boolean) => Promise<void> | void;
+  onForgotPassword: (email: string) => void;
   loading: boolean;
   error?: string;
 }
 
 export default function LoginForm({
-  onContinue,
+  onPassword,
+  onOtp,
+  onForgotPassword,
   loading,
   error,
 }: LoginFormProps) {
   const [email, setEmail] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [touched, setTouched] = useState(false);
+  const [pendingAction, setPendingAction] = useState<"password" | "otp" | null>(
+    null,
+  );
 
   const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
-  const handleSubmit = async (e?: React.FormEvent) => {
-    e?.preventDefault();
-    if (!isValidEmail) return;
-    onContinue(email, rememberMe);
-  };
+  const normalizedEmail = email.trim().toLowerCase();
 
   return (
     <>
@@ -66,7 +68,7 @@ export default function LoginForm({
         <div className="signin-banner-from-box text-center">
           <h5 className="signin-banner-from-subtitle">Or Sign In with email</h5>
 
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={(e) => e.preventDefault()}>
             <div className="row">
               <div className="col-12">
                 <div className="postbox__comment-input mb-30">
@@ -116,33 +118,73 @@ export default function LoginForm({
               </div>
             </div>
 
-            <div className="signin-banner-from-btn mb-20">
+            <div className="signin-banner-from-btn mb-10">
               <button
-                type="submit"
+                type="button"
                 className="signin-btn w-full"
                 disabled={!isValidEmail || loading}
-              style={
-                !isValidEmail || loading
-                  ? {
-                      cursor: "not-allowed",
-                      opacity: 0.6,
-                    }
-                  : { cursor: "pointer" }
-              }
-            >
-              {loading ? (
-                <span className="d-inline-flex align-items-center gap-2">
-                  <span
-                    className="spinner-border spinner-border-sm"
-                    role="status"
-                  />
-                  Sending...
-                </span>
-              ) : (
-                "Send OTP"
-              )}
+                onClick={() => {
+                  setTouched(true);
+                  if (!isValidEmail) return;
+                  setPendingAction("password");
+                  onPassword(normalizedEmail, rememberMe);
+                }}
+                style={
+                  !isValidEmail || loading
+                    ? { cursor: "not-allowed", opacity: 0.6 }
+                    : { cursor: "pointer" }
+                }
+              >
+                Sign in with password
               </button>
             </div>
+            <div className="signin-banner-from-btn mb-20">
+              <button
+                type="button"
+                className="signin-btn w-full"
+                disabled={!isValidEmail || loading}
+                onClick={async () => {
+                  setTouched(true);
+                  if (!isValidEmail) return;
+                  setPendingAction("otp");
+                  await onOtp(normalizedEmail, rememberMe);
+                  setPendingAction(null);
+                }}
+                style={
+                  !isValidEmail || loading
+                    ? {
+                        cursor: "not-allowed",
+                        opacity: 0.6,
+                        background: "transparent",
+                        border: "1px solid currentColor",
+                      }
+                    : {
+                        cursor: "pointer",
+                        background: "transparent",
+                        border: "1px solid currentColor",
+                      }
+                }
+              >
+                {loading && pendingAction === "otp" ? (
+                  <span className="d-inline-flex align-items-center gap-2">
+                    <span
+                      className="spinner-border spinner-border-sm"
+                      role="status"
+                    />
+                    Sending...
+                  </span>
+                ) : (
+                  "Send one-time code"
+                )}
+              </button>
+            </div>
+            <button
+              type="button"
+              className="btn btn-link p-0"
+              onClick={() => onForgotPassword(normalizedEmail)}
+            >
+              <small>Forgot or set password</small>
+            </button>
           </form>
         </div>
       </div>

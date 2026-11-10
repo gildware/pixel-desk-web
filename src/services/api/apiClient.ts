@@ -13,11 +13,15 @@ const AUTH_PATHS_NO_REFRESH = new Set([
   '/auth/refresh',
   '/auth/request-otp',
   '/auth/verify-otp',
+  '/auth/login-password',
+  '/auth/forgot-password',
+  '/auth/reset-password',
   '/auth/logout',
 ]);
 
 function shouldTryRefresh(endpoint: string): boolean {
-  return !AUTH_PATHS_NO_REFRESH.has(endpoint);
+  const path = endpoint.split('?')[0];
+  return !AUTH_PATHS_NO_REFRESH.has(path);
 }
 
 async function postRefresh(): Promise<boolean> {

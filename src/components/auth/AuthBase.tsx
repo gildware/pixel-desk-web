@@ -3,8 +3,19 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import LoginForm from "@/src/components/auth/LoginForm";
 import OtpVerification from "@/src/components/auth/OtpVerification";
-import { logout, requestOtp, verifyOtp } from "@/src/services/api/auth.api";
+import PasswordLoginForm from "@/src/components/auth/PasswordLoginForm";
+import ForgotPasswordForm from "@/src/components/auth/ForgotPasswordForm";
+import CheckEmailNotice from "@/src/components/auth/CheckEmailNotice";
+import {
+  forgotPassword,
+  loginWithPassword,
+  logout,
+  requestOtp,
+  verifyOtp,
+} from "@/src/services/api/auth.api";
 import { useSession } from "@/src/context/SessionContext";
+
+type AuthStep = "email" | "password" | "otp" | "forgot" | "check-email";
 
 function dashboardRedirectUrl(baseUrl: string): string {
   try {
@@ -20,10 +31,11 @@ function dashboardRedirectUrl(baseUrl: string): string {
 export default function AuthBase() {
   const { session, loading: sessionLoading } = useSession();
   const dashboardUrl = process.env.NEXT_PUBLIC_DASHBOARD_URL || "/dashboard";
+  const [step, setStep] = useState<AuthStep>("email");
   const [email, setEmail] = useState<string | null>(null);
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState();
+  const [error, setError] = useState<string | undefined>();
   const [loggingOut, setLoggingOut] = useState(false);
 
   useEffect(() => {
@@ -32,14 +44,24 @@ export default function AuthBase() {
     }
   }, [dashboardUrl, session, sessionLoading]);
 
+  const normalizeEmail = (value: string) => value.trim().toLowerCase();
+
+  const resetToEmail = () => {
+    setStep("email");
+    setEmail(null);
+    setError(undefined);
+  };
+
   const handleRequestOtp = async (value: string, rememberChoice: boolean) => {
     try {
       setLoading(true);
+      setError(undefined);
       await requestOtp(value);
       setEmail(value);
       setRememberMe(rememberChoice);
+      setStep("otp");
     } catch (err: any) {
-      alert(err.message);
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -50,19 +72,50 @@ export default function AuthBase() {
     try {
       await requestOtp(email);
     } catch (err: any) {
-      alert(err.message);
+      setError(err.message);
     }
   };
 
   const handleVerifyOtp = async (otp: string) => {
     if (!email) return;
-
     try {
       setLoading(true);
+      setError(undefined);
       await verifyOtp(email, otp, rememberMe);
-
-      // cookies are set by backend; reload into protected route
       window.location.replace(dashboardRedirectUrl(dashboardUrl));
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePasswordLogin = async (
+    password: string,
+    rememberChoice: boolean,
+  ) => {
+    if (!email) return;
+    try {
+      setLoading(true);
+      setError(undefined);
+      setRememberMe(rememberChoice);
+      await loginWithPassword(email, password, rememberChoice);
+      window.location.replace(dashboardRedirectUrl(dashboardUrl));
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleForgotSubmit = async (value: string) => {
+    try {
+      setLoading(true);
+      setError(undefined);
+      const normalized = normalizeEmail(value);
+      await forgotPassword(normalized);
+      setEmail(normalized);
+      setStep("check-email");
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -74,8 +127,6 @@ export default function AuthBase() {
     try {
       setLoggingOut(true);
       await logout();
-
-      // ✅ cookies cleared by backend
       window.location.href = "/login";
     } catch (err: any) {
       alert(err.message || "Logout failed");
@@ -83,12 +134,76 @@ export default function AuthBase() {
       setLoggingOut(false);
     }
   };
+
+  let authContent = (
+    <LoginForm
+      onPassword={(value, rememberChoice) => {
+        setEmail(normalizeEmail(value));
+        setRememberMe(rememberChoice);
+        setError(undefined);
+        setStep("password");
+      }}
+      onOtp={handleRequestOtp}
+      onForgotPassword={(value) => {
+        setError(undefined);
+        setEmail(value ? normalizeEmail(value) : null);
+        setStep("forgot");
+      }}
+      loading={loading}
+      error={error}
+    />
+  );
+
+  if (step === "forgot") {
+    authContent = (
+      <ForgotPasswordForm
+        initialEmail={email || ""}
+        onSubmit={handleForgotSubmit}
+        onBack={() => setStep(email ? "password" : "email")}
+        loading={loading}
+        error={error}
+      />
+    );
+  } else if (step === "check-email" && email) {
+    authContent = (
+      <CheckEmailNotice
+        email={email}
+        loading={loading}
+        error={error}
+        onResend={() => handleForgotSubmit(email)}
+        onBack={resetToEmail}
+      />
+    );
+  } else if (step === "password" && email) {
+    authContent = (
+      <PasswordLoginForm
+        email={email}
+        initialRememberMe={rememberMe}
+        loading={loading}
+        error={error}
+        onSubmit={handlePasswordLogin}
+        onForgotPassword={() => {
+          setError(undefined);
+          setStep("forgot");
+        }}
+        onUseOtp={() => handleRequestOtp(email, rememberMe)}
+        onChangeEmail={resetToEmail}
+      />
+    );
+  } else if (step === "otp" && email) {
+    authContent = (
+      <OtpVerification
+        email={email}
+        onVerify={handleVerifyOtp}
+        onResendOtp={handleResendOtp}
+        loading={loading}
+        error={error}
+      />
+    );
+  }
+
   return (
-    <div
-      className="signin-banner-area signin-banner-main-wrap d-flex align-items-center"
-      //   style={{ height: "100vh", overflow: "hidden" }}
-    >
-      {/* BACK BUTTON */}
+    <div className="signin-banner-area signin-banner-main-wrap d-flex align-items-center">
       <Link
         href="/"
         className="tp-btn-yellow position-absolute top-0 start-0 m-3 d-inline-flex align-items-center"
@@ -141,23 +256,7 @@ export default function AuthBase() {
               </button>
             </div>
           ) : (
-            <>
-              {!email ? (
-                <LoginForm
-                  onContinue={handleRequestOtp}
-                  loading={loading}
-                  error={error}
-                />
-              ) : (
-                <OtpVerification
-                  email={email}
-                  onVerify={handleVerifyOtp}
-                  onResendOtp={handleResendOtp}
-                  loading={loading}
-                  error={error}
-                />
-              )}
-            </>
+            authContent
           )}
         </div>
       )}

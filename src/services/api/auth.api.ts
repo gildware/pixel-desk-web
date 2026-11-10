@@ -14,14 +14,32 @@ export const verifyOtp = (email: string, otp: string, rememberMe: boolean) => {
   });
 };
 
+export const loginWithPassword = (
+  email: string,
+  password: string,
+  rememberMe: boolean,
+) => {
+  return apiClient('/auth/login-password', {
+    method: 'POST',
+    body: { email, password, rememberMe },
+  });
+};
+
+export const forgotPassword = (email: string) => {
+  return apiClient('/auth/forgot-password', {
+    method: 'POST',
+    body: { email },
+  });
+};
+
 export const logout = () => {
   return apiClient('/auth/logout', {
     method: 'POST',
   });
-}; 
+};
 
 export const getSession = () => {
-  return apiClient("/auth/session", {
-    method: "GET",
+  return apiClient('/auth/session', {
+    method: 'GET',
   });
 };
